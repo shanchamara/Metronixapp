@@ -1,0 +1,45 @@
+name: React App CI/CD with Docker Compose (Local Deployment)
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      # Check out the repository
+      - uses: actions/checkout@v4
+
+      # Set up Docker
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      # Build the Docker Compose services
+      - name: Build Docker Compose services
+        run: |
+          # Build the Docker images using Docker Compose
+          docker-compose -f docker-compose.yml build
+
+  deploy:
+    runs-on: self-hosted  # Use your self-hosted runner for deployment
+    needs: build
+    steps:
+      # Check out the repository
+      - uses: actions/checkout@v4
+
+      # Set up Docker
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      # Remove existing containers (if any)
+      - name: Remove existing Docker containers
+        run: |
+          # Stop and remove any existing containers from the previous deployment
+          docker-compose -f docker-compose.yml down
+
+      # Deploy using Docker Compose (e.g., to your server or cloud environment)
+      - name: Deploy Docker Compose services
+        run: |
+          # Deploy the app using Docker Compose
+          docker-compose -f docker-compose.yml up -d  # Run in detached mode
